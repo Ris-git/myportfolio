@@ -1,41 +1,30 @@
 "use client";
 
-import Image from "next/image";
-import { Github, Linkedin, Youtube, Calendar, Bot, User, QrCode, X, ArrowRight, ChevronDown, ChevronUp, Mail } from "lucide-react";
-import { FaXTwitter, FaMedium } from "react-icons/fa6";
-import { ExperienceItem } from "./components/ExperienceItem";
-import { ExpandableExperienceItem } from "./components/ExpandableExperienceItem";
-import { GithubGraph } from "./components/GithubGraph";
-import { TechStack } from "./components/TechStack";
 import { useState, useEffect, useMemo } from "react";
-import { useTheme } from "next-themes";
-import { QRCodeSVG } from "qrcode.react";
-import { ThemeToggle } from "./components/ThemeToggle";
 import { motion, AnimatePresence } from "framer-motion";
+import { QRCodeSVG } from "qrcode.react";
+import { QrCode, X, User, Bot } from "lucide-react";
 
+import { ThemeToggle } from "./components/ThemeToggle";
+import { Icon } from "./components/icons";
+import { SectionRenderer, type PortfolioData } from "./components/sections/registry";
+import { generateMarkdown } from "./data/generateMarkdown";
+import portfolioJson from "./data/portfolio.json";
 
-
-import { getMarkdownContent } from "./data/content";
-
-const DiscordIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
-    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1971.3728.2914a.077.077 0 01-.0066.1277 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z" />
-  </svg>
-);
+const portfolio = portfolioJson as unknown as PortfolioData;
 
 export default function Home() {
   const [time, setTime] = useState<string>("");
   const [showQR, setShowQR] = useState(false);
   const [mode, setMode] = useState<"human" | "agent">("human");
 
-  const { setTheme, resolvedTheme } = useTheme();
-
+  // Single clock, shared by the hero display and the agent-mode markdown.
+  const tz = portfolio.sections.find((s) => s.type === "hero")?.data.timezone.tz ?? "Asia/Kolkata";
   useEffect(() => {
     const updateTime = () => {
-      const now = new Date();
       setTime(
-        now.toLocaleTimeString("en-IN", {
-          timeZone: "Asia/Kolkata",
+        new Date().toLocaleTimeString("en-IN", {
+          timeZone: tz,
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -43,24 +32,15 @@ export default function Home() {
         })
       );
     };
-
     updateTime();
     const timer = setInterval(updateTime, 1000);
-
     return () => clearInterval(timer);
-  }, []);
+  }, [tz]);
 
-  const markdownContent = getMarkdownContent(time);
-
-  const [journeyExpanded, setJourneyExpanded] = useState(false);
-  const [remixExpanded, setRemixExpanded] = useState(false);
-  const [publicationExpanded, setPublicationExpanded] = useState(false);
-
-
+  const markdownContent = useMemo(() => generateMarkdown(portfolio, time), [time]);
 
   return (
-    <div className={`relative flex min-h-screen flex-col items-center bg-white dark:bg-black px-3 pt-16 text-black dark:text-white selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black pb-32 sm:px-4 sm:pt-24 sm:pb-40 overflow-x-hidden transition-colors duration-300`}>
-
+    <div className="relative flex min-h-screen flex-col items-center bg-white dark:bg-black px-3 pt-16 text-black dark:text-white selection:bg-black dark:selection:bg-white selection:text-white dark:selection:text-black pb-32 sm:px-4 sm:pt-24 sm:pb-40 overflow-x-hidden transition-colors duration-300">
       {/* Theme Toggle in Top Right */}
       <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
@@ -85,7 +65,7 @@ export default function Home() {
             </pre>
           </motion.main>
         ) : (
-          /* Human Mode - Original View */
+          /* Human Mode - Data-driven sections */
           <motion.main
             key="human"
             initial={{ opacity: 0, y: 10 }}
@@ -94,539 +74,9 @@ export default function Home() {
             transition={{ duration: 0.35, ease: "easeOut" }}
             className="flex w-full max-w-2xl flex-col items-center text-center"
           >
-            {/* Profile Image */}
-            <div className="relative mb-2 h-40 w-40 sm:h-56 sm:w-56 overflow-hidden">
-              <Image
-                src="/me.png"
-                alt="Profile"
-                fill
-                sizes="(max-width: 640px) 160px, 224px"
-                className="object-contain grayscale"
-                priority
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-black dark:via-black/60 backdrop-blur-[1px]" />
-            </div>
-
-            {/* Hero Text */}
-            <h1 className="mb-4 text-5xl font-bold tracking-tight sm:text-7xl">
-              Aditya Patil
-            </h1>
-
-            {/* Phonetic Pronunciation (Aesthetic touch often found in minimal portfolios) */}
-            <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 sm:text-sm">
-              <span>/əˈdɪtjə pɑːˈtiːl/</span>
-              <span className="text-gray-300 dark:text-gray-700">•</span>
-              <span>noun</span>
-              <span className="text-gray-300 dark:text-gray-700">•</span>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="tabular-nums text-xs sm:text-sm">{time || "00:00:00"}</span>
-                  <span className="text-[10px] uppercase tracking-wider sm:text-xs">IST</span>
-                </div>
-
-              </div>
-            </div>
-
-            <div className="w-full space-y-4 text-left text-base leading-relaxed text-gray-600 dark:text-gray-400 sm:text-lg md:text-xl">
-              <p>
-                a full-stack developer and <a href="https://en.wikipedia.org/wiki/Product_design" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-black dark:hover:text-white transition-colors">product builder</a> with deep experience across engineering, product strategy, and user-centric design.
-              </p>
-              <p>
-                a <a href="https://en.wikipedia.org/wiki/Polymath" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-black dark:hover:text-white transition-colors">polymath</a> who bridges technical architecture with business outcomes to create impactful, scalable solutions.
-              </p>
-            </div>
-
-
-
-            {/* Experience Section */}
-            <div className="mt-6 mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Experience
-              </h2>
-              {/* Featured / Current role */}
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <a
-                    href="https://www.ycombinator.com/companies/resonate"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-semibold text-black dark:text-white underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-black dark:hover:decoration-white transition-colors"
-                  >
-                    Remix (YC W26)
-                  </a>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-500">Software Engineer, San Francisco, CA</span>
-                </div>
-
-                <div className={`relative space-y-3 text-base leading-relaxed text-gray-600 dark:text-gray-400 transition-all duration-500 ${!remixExpanded ? "max-h-48 overflow-hidden" : ""}`}>
-                  <p>As an early software engineer bridging product strategy and technical execution, I am driving the development of an AI-native messaging platform from zero to one.</p>
-                  <p>Key focus areas include:</p>
-                  <ul className="list-disc list-inside space-y-1 pl-2">
-                    <li>Architecting and building core product features for an AI-focused messaging ecosystem.</li>
-                    <li>Developing real-time systems and innovating ways to transform and present information dynamically within messaging interfaces.</li>
-                    <li>Collaborating within a lean team to build robust tools for AI-driven communication.</li>
-                    <li>Operating top-to-bottom, from product conception to complete software development.</li>
-                  </ul>
-                  <p>Transitioning into this founding-level role has been an incredibly rewarding next step following my previous startup ventures.</p>
-
-                  {!remixExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-black to-transparent" />
-                  )}
-                </div>
-
-                <button
-                  onClick={() => setRemixExpanded(!remixExpanded)}
-                  className="mt-4 flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                >
-                  {remixExpanded ? (
-                    <>View Less <ChevronUp className="h-3 w-3" /></>
-                  ) : (
-                    <>View More <ChevronDown className="h-3 w-3" /></>
-                  )}
-                </button>
-              </div>
-
-              {/* Previously — compact titles, expand on click */}
-              <div className="mt-10">
-                <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-600">
-                  Previously
-                </h3>
-                <div className="flex flex-col gap-1 rounded-xl border border-gray-200 dark:border-gray-800 px-6 py-2 sm:px-8 sm:py-3">
-                  <ExpandableExperienceItem
-                    title="Entrepreneur First"
-                    role="Founder in Residence, Bengaluru"
-                    link="https://www.joinef.com/"
-                  >
-                    <div className="space-y-2">
-                      <p>As a Founder in Residence at Entrepreneurs First (EF), a premier global talent investor and startup accelerator, I was immersed in designing and developing cutting-edge Agentic AI systems.</p>
-                      <p>Built autonomous, goal-driven AI agents that shifted from suggestion-based tools to proactive execution, enabling seamless human-AI collaboration and redefining task automation and decision-making.</p>
-                      <p>Drove a bold vision for the future of computing: making traditional web browsing obsolete, turning personal data into the primary interface, and empowering agentic systems to independently handle complex responsibilities.</p>
-                      <p>Operated in a high-intensity environment surrounded by world-class cofounders, mentors, and resources, using EF's structured support to explore, validate, and iterate on ideas at pace.</p>
-                      <p>Positioned at the forefront of a paradigm shift in AI, tackling hard technical and conceptual challenges to create meaningful, scalable impact in the emerging agentic era.</p>
-                    </div>
-                  </ExpandableExperienceItem>
-
-                  <ExpandableExperienceItem
-                    title="Google Summer of Code 2025"
-                    role="Emory University School of Medicine, Atlanta, USA"
-                    link="https://minimalistbook.com/gsoc-final-report-2025/"
-                  >
-                    <div className="space-y-2">
-                      <p>Designed and developed a comprehensive system for managing Access Control List (ACL) permissions across multiple Linux file system servers, including NFS and BeeGFS, demonstrating expertise in large-scale distributed systems and secure file management.</p>
-                      <p>Built a robust backend capable of processing millions of permission change requests, showcasing proficiency in high-performance computing and scalability.</p>
-                      <p>Implemented two Linux systemd daemons communicating via Unix sockets: one for gRPC-based backend interactions and another for executing ACL changes, highlighting skills in daemon development, inter-process communication, and system-level programming.</p>
-                      <p>Created a user-friendly Next.js frontend enabling secure login, backend communication, and scheduling of permission requests, illustrating full-stack development capabilities and focus on intuitive user experiences.</p>
-                    </div>
-                  </ExpandableExperienceItem>
-
-                  <ExpandableExperienceItem
-                    title="Professional Freelancer (Technical GTM)"
-                    role="Technical Writer, Tel Aviv, Israel"
-                    link="https://www.upwork.com/freelancers/~0172a072394ece49bb?viewMode=1"
-                  >
-                    <div className="space-y-2">
-                      <p>Authored comprehensive, highly technical documentation (50+ pages) for a Software Composition Analysis (SCA) tool, including detailed guides on advanced features such as reachability analysis - focusing on identifying truly exploitable vulnerabilities in open-source dependencies to reduce noise and prioritize remediation in secure software development lifecycles.</p>
-                      <p>Ghostwrote in-depth content on Reachability Analysis for the CTO of a security company, explaining how it enhances SCA by determining whether detected vulnerabilities are actually reachable and exploitable in the application's codebase - delivering clear, authoritative thought leadership material suitable for blogs, whitepapers, or technical marketing.</p>
-                      <p>Deployed and configured Flipt (an open-source, Git-native feature flagging platform) on cloud infrastructure to support video production workflows for a feature flagging provider; troubleshot and resolved operational issues to ensure reliable, production-ready performance in a dynamic environment.</p>
-                      <p>Developed custom scraping tools for a proxy provider targeting real estate platforms, enabling efficient data extraction while adhering to technical and ethical constraints; rapidly produced high-quality articles and technical write-ups on the tools, scraping methodologies, and platform integrations to support knowledge sharing and client deliverables.</p>
-                    </div>
-                  </ExpandableExperienceItem>
-
-                  <ExpandableExperienceItem
-                    title="Engineering Intern"
-                    role="Athena Consulting Ltd. Dubai"
-                  >
-                    <div className="space-y-2">
-                      <p>Led the complete system design and deployment architecture for Eumlet, a UAE-based B2B Web3 payments and financial platform (built on Next.js), on AWS infrastructure. Configured Debian EC2 instances, Application Load Balancer (ALB), and NGINX reverse proxy under senior guidance - ensuring high availability, scalability, and secure handling of financial transactions in a regulated environment.</p>
-                      <p>Engineered automated CI/CD pipelines using GitHub Actions for seamless build, test, and deployment workflows, with direct integration and manual orchestration to EC2 targets - demonstrating strong expertise in modern DevOps practices, infrastructure as code principles, and zero-downtime deployments for production fintech applications.</p>
-                      <p>Managed a team of 4 developers while simultaneously supporting two high-value clients: Lunarspace and Concordium (a privacy-focused Layer-1 blockchain platform) - balancing tight deadlines, client expectations, and resource constraints in a fast-paced environment. Authored comprehensive legal and technical developer handbooks to standardize onboarding, compliance, and best practices for new recruits.</p>
-                      <p>Collaborated remotely with BGTrade (China-based financial platform team) on global security audits and production deployments of sensitive financial systems - coordinating across time zones and cultures to identify vulnerabilities, implement hardening measures, and ensure secure, compliant rollouts in cross-border fintech ecosystems.</p>
-                    </div>
-                  </ExpandableExperienceItem>
-                </div>
-              </div>
-            </div>
-
-
-            {/* Tech Stack Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Generalist by Heart, Specialist by Profession
-              </h2>
-              <TechStack />
-            </div>
-
-            {/* In Between These Experiences Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                In Between These Experiences
-              </h2>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                <div className="mb-6">
-                  <span className="text-lg font-semibold text-black dark:text-white">
-                    The Product Building Journey
-                  </span>
-                </div>
-
-                <div className={`relative space-y-3 text-base leading-relaxed text-gray-600 dark:text-gray-400 transition-all duration-500 ${!journeyExpanded ? "max-h-48 overflow-hidden" : ""}`}>
-                  <p>I&apos;ve been building and experimenting on the product side for a long time. Each previous product always feels naive in hindsight, but looking back, I can see they were incrementally better, each iteration teaching me something new about users, infrastructure, and what it takes to build something people actually want.</p>
-
-                  <p>It started with <span className="font-medium text-black dark:text-white">MetaWiper</span> during my sophomore year, a tool that cleaned image metadata. No one would use it, but I was proud. It was my first real attempt at shipping something complete.</p>
-
-                  <p>Next came <span className="font-medium text-black dark:text-white">Stockic</span>, a news app where I spent months doing serious infrastructure work. This was where I learned to build systems that could scale, not just features that looked good.</p>
-
-                  <p>Then I worked on <span className="font-medium text-black dark:text-white">Gloss Card</span>, and for the first time, a customer actually wanted to buy it for their product. That validation, knowing someone saw enough value to pay, was a turning point.</p>
-
-                  <p>After that, I built <span className="font-medium text-black dark:text-white">NeuraLeap</span>, where I had the most meaningful user interactions yet, HRs from established firms. I worked on data pipelines capable of handling 50 million LinkedIn profiles and processing them with AI. The scale was different, the stakes were higher, and the technical challenges forced me to level up.</p>
-
-                  <p>Most recently, I worked on <span className="font-medium text-black dark:text-white">Meteor</span>, an AI SEO toolkit at Entrepreneurs First. This time, my product was being used by 6 YC-backed companies. Real users. Real traction. Real feedback loops.</p>
-
-                  <p className="font-medium text-black dark:text-white">So yes, hard work and consistency pay off. Each product was a step forward, even when it didn&apos;t feel like it at the time.</p>
-
-                  {!journeyExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-white dark:from-black to-transparent" />
-                  )}
-                </div>
-
-                <button
-                  onClick={() => setJourneyExpanded(!journeyExpanded)}
-                  className="mt-4 flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                >
-                  {journeyExpanded ? (
-                    <>View Less <ChevronUp className="h-3 w-3" /></>
-                  ) : (
-                    <>View More <ChevronDown className="h-3 w-3" /></>
-                  )}
-                </button>
-              </div>
-            </div>
-
-
-            {/* Coolest Experiment Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Coolest Experiment with Consumer Tech
-              </h2>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <a
-                    href="https://www.doubledart.fun/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-semibold text-black dark:text-white underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-black dark:hover:decoration-white transition-colors"
-                  >
-                    Double Dart
-                  </a>
-                  <span className="text-xs font-medium text-gray-500 dark:text-gray-500">Anonymous crush matching for NIT Hamirpur, Class of 2026</span>
-                </div>
-
-                <div className="space-y-3 text-base leading-relaxed text-gray-600 dark:text-gray-400">
-                  <p>
-                    a 3-day social experiment i shipped with a batchmate: graduating students anonymously dart the people they noticed over four years. a crush stays sealed forever unless it is mutual, and only then are both names revealed.
-                  </p>
-                  <p>
-                    built lean on Supabase and Vercel with college-email Google sign-in. no ops team, no data hoarding, the database was destroyed after the event and only anonymized stats remain.
-                  </p>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-6 sm:grid-cols-4">
-                  {[
-                    { value: "201", label: "sign-ups in 3 days" },
-                    { value: "238", label: "crushes sent" },
-                    { value: "11", label: "mutual pairs matched" },
-                    { value: "766", label: "unique visitors" },
-                    { value: "80.7K", label: "Supabase requests" },
-                    { value: "3.2K", label: "page views" },
-                    { value: "85%", label: "mobile traffic" },
-                    { value: "9.2%", label: "crushes reciprocated" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="flex flex-col gap-1">
-                      <span className="text-2xl font-bold tabular-nums text-black dark:text-white sm:text-3xl">
-                        {stat.value}
-                      </span>
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
-                        {stat.label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <a
-                  href="https://www.doubledart.fun/case-study"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-8 inline-flex items-center gap-1 text-xs font-medium text-black dark:text-white underline underline-offset-4 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  Read the full case study <ArrowRight className="h-3 w-3" />
-                </a>
-              </div>
-            </div>
-
-            {/* YouTuber Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                YouTuber @theracecondition
-              </h2>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                {/* Channel header */}
-                <div className="flex items-center gap-4">
-                  <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full">
-                    <Image
-                      src="/youtube-profile.png"
-                      alt="The Race Condition"
-                      fill
-                      sizes="64px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <a
-                      href="https://www.youtube.com/@theracecondition"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-2 text-lg font-semibold text-black dark:text-white underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-black dark:hover:decoration-white transition-colors"
-                    >
-                      <Youtube className="h-5 w-5 text-gray-300 dark:text-gray-600 transition-colors group-hover:text-red-600" />
-                      The Race Condition
-                    </a>
-                    <span className="text-xs font-medium text-gray-500 dark:text-gray-500">where i break down complex systems and engineering ideas</span>
-                    <a
-                      href="https://discord.gg/ry4YCJaShK"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                    >
-                      <DiscordIcon className="h-3.5 w-3.5 text-gray-300 dark:text-gray-600 transition-colors group-hover:text-[#5865F2]" />
-                      <span><span className="font-semibold text-black dark:text-white">300+ members</span> driven into the Discord community</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* Video list */}
-                <div className="mt-6 flex flex-col gap-1">
-                  {[
-                    { title: "System Design: Building Dropbox (File Sync & Storage Service)", url: "https://www.youtube.com/watch?v=6Bkvdyb3pvs" },
-                    { title: "System Design: Building Spotify (Music Streaming Service)", url: "https://www.youtube.com/watch?v=m84tBP_4DWE" },
-                    { title: "Understanding REST APIs for System Design", url: "https://www.youtube.com/watch?v=-btg5UuI6dw" },
-                    { title: "Top 5 Programming Languages for 2026", url: "https://www.youtube.com/watch?v=lJXq8o6o0jY" },
-                    { title: "Reviewing my 47 Pages GSoC Proposal", url: "https://www.youtube.com/watch?v=6HOlwQxgqDs" },
-                  ].map((video) => (
-                    <a
-                      key={video.url}
-                      href={video.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center justify-between gap-3 py-3 text-sm text-gray-600 dark:text-gray-400 transition-colors hover:text-black dark:hover:text-white"
-                    >
-                      <span className="flex items-center gap-2.5">
-                        <Youtube className="h-4 w-4 shrink-0 text-gray-300 dark:text-gray-600 transition-colors group-hover:text-red-600" />
-                        {video.title}
-                      </span>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
-                    </a>
-                  ))}
-                </div>
-
-                <a
-                  href="https://www.youtube.com/@theracecondition/videos"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-6 inline-flex items-center gap-1 text-xs font-medium text-black dark:text-white underline underline-offset-4 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  and much more on the channel <ArrowRight className="h-3 w-3" />
-                </a>
-              </div>
-            </div>
-
-            {/* Education Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Education
-              </h2>
-              <div className="space-y-12">
-                <ExperienceItem
-                  title="National Institute of Technology Hamirpur"
-                  role="Electrical Engineering"
-                >
-                  <p>2022 - Surviving</p>
-                </ExperienceItem>
-              </div>
-            </div>
-
-            {/* Contributions Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                GitHub Contributions
-              </h2>
-              <GithubGraph />
-            </div>
-
-            {/* Research Publications Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Research Publications
-              </h2>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                <div className="mb-1">
-                  <a
-                    href="https://doi.org/10.1109/COMSNETS63942.2025.10885597"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-lg font-semibold text-black dark:text-white underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-black dark:hover:decoration-white transition-colors"
-                  >
-                    Cross-Compatible Encryption Adapter for Securing Legacy Modbus Devices
-                  </a>
-                </div>
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-500">
-                  2025 17th International Conference on COMmunication Systems and NETworks (COMSNETS)
-                </p>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Authors: Aditya Patil; T. S. Sreeram</p>
-
-                <div className={`relative mt-6 space-y-2 transition-all duration-500 ${!publicationExpanded ? "max-h-32 overflow-hidden" : ""}`}>
-                  <p className="text-xs uppercase tracking-wider text-gray-400 dark:text-gray-500 font-bold">Abstract</p>
-                  <p className="text-base leading-relaxed text-gray-600 dark:text-gray-400">Supervisory Control and Data Acquisition systems are the backbone of managing critical infrastructure in modern industrial control systems, spanning sectors from power generation to logistics. However, these systems face significant challenges due to threats from malicious actors. The Modbus protocol, despite its known lack of security features, is still used in many industries managing critical infrastructure due to the high cost of replacing existing systems. As a result, these legacy systems remain vulnerable to potentially damaging threats. This paper proposes an adapter device for enhancing the security of the Modbus protocol without replacing devices in legacy systems. The proposed adapter is cost-efficient, provides cross-platform support, and is easy to install, update, and maintain.</p>
-
-                  {!publicationExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white dark:from-black to-transparent" />
-                  )}
-                </div>
-
-                <button
-                  onClick={() => setPublicationExpanded(!publicationExpanded)}
-                  className="mt-4 flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors"
-                >
-                  {publicationExpanded ? (
-                    <>View Less <ChevronUp className="h-3 w-3" /></>
-                  ) : (
-                    <>View More <ChevronDown className="h-3 w-3" /></>
-                  )}
-                </button>
-
-                <a
-                  href="https://doi.org/10.1109/COMSNETS63942.2025.10885597"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-black dark:text-white underline underline-offset-4 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                >
-                  View Publication <ArrowRight className="h-3 w-3" />
-                </a>
-              </div>
-            </div>
-
-            {/* Recommendations by Clients Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Recommendations by Clients
-              </h2>
-              <div className="space-y-8 rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                {/* Roy Feldman Recommendation */}
-                <div className="group">
-                  <div className="mb-3">
-                    <a
-                      href="https://www.linkedin.com/in/royhax/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-base font-semibold text-black dark:text-white underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-black dark:hover:decoration-white transition-colors"
-                    >
-                      Roy Feldman
-                    </a>
-                    <span className="ml-2 text-xs font-medium text-gray-500 dark:text-gray-500">Ex. 8200 (Israeli Intelligence Corps)</span>
-                  </div>
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                    I've had the privilege to work with Aditya on several highly technical cybersecurity R&D projects involving design and implementation of defensive network components in Golang, network protocol research and analysis. He is a bright young engineer, extremely talented in hacking and cybersecurity, with a natural curiosity and passion for hacking, and a gift understanding how systems work, how to design and break them. I am certain that he will succeed in any endeavor he puts his mind to, in the realms of cybersecurity, engineering and beyond! :)
-                  </p>
-                </div>
-
-                {/* Tom Granot Recommendation */}
-                <div className="group">
-                  <div className="mb-3">
-                    <a
-                      href="https://www.linkedin.com/in/tomgranot/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-base font-semibold text-black dark:text-white underline underline-offset-4 decoration-gray-300 dark:decoration-gray-700 hover:decoration-black dark:hover:decoration-white transition-colors"
-                    >
-                      Tom Granot
-                    </a>
-                    <span className="ml-2 text-xs font-medium text-gray-500 dark:text-gray-500">Technical GTM (Israel)</span>
-                  </div>
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-                    It's not often that you get to talk to a person who is not only hungry for mentorship, but comes out of the gate with the attitude that enables him to learn so, so quickly on his feet.
-                    <br /><br />
-                    Aditya did research for highly technical content for me and independently navigated difficult situations without a lot of guidance. If you're looking for someone to research a technical topic for your content work, Aditya is disciplined, thorough and insistent on understanding things in depth before giving a final output.
-                    <br /><br />
-                    Keep on keeping on brother!
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Get in Touch Section */}
-            <div className="mb-16 w-full text-left">
-              <h2 className="mb-6 text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-                Get in Touch
-              </h2>
-              <div className="rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8">
-                <h3 className="text-lg font-semibold text-black dark:text-white">
-                  Let&apos;s build something together
-                </h3>
-                <p className="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-400">
-                  open to opportunities, collaborations, and good conversations. book a slot on my calendar or drop me a line.
-                </p>
-
-                {/* Primary CTAs */}
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <a
-                    href="https://cal.com/adi-patil/30min"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-black dark:bg-white px-5 py-3 text-sm font-semibold text-white dark:text-black transition-opacity hover:opacity-90"
-                  >
-                    <Calendar className="h-4 w-4" />
-                    Schedule a meeting
-                  </a>
-                  <a
-                    href="mailto:adityapatil24680@gmail.com"
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-gray-800 px-5 py-3 text-sm font-semibold text-black dark:text-white transition-colors hover:bg-gray-50 dark:hover:bg-zinc-900"
-                  >
-                    <Mail className="h-4 w-4" />
-                    Email me
-                  </a>
-                </div>
-
-                {/* Socials */}
-                <div className="mt-8">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-600">
-                    Find me on
-                  </p>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {[
-                      { label: "GitHub", href: "https://github.com/PythonHacker24", icon: <Github className="h-4 w-4" /> },
-                      { label: "LinkedIn", href: "https://www.linkedin.com/in/aditya-patil-260a631b2/", icon: <Linkedin className="h-4 w-4" /> },
-                      { label: "X", href: "https://x.com/firecaffeine", icon: <FaXTwitter className="h-4 w-4" /> },
-                      { label: "YouTube", href: "https://youtube.com/@theracecondition", icon: <Youtube className="h-4 w-4" /> },
-                      { label: "Discord", href: "https://discord.gg/ry4YCJaShK", icon: <DiscordIcon className="h-4 w-4" /> },
-                      { label: "Medium", href: "https://medium.com/@adityapatil24680", icon: <FaMedium className="h-4 w-4" /> },
-                    ].map((social) => (
-                      <a
-                        key={social.label}
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={social.label}
-                        className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400 transition-colors hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white"
-                      >
-                        {social.icon}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-
-
+            {portfolio.sections.map((section, i) => (
+              <SectionRenderer key={i} section={section} ctx={{ time, socials: portfolio.socials }} />
+            ))}
           </motion.main>
         )}
       </AnimatePresence>
@@ -643,8 +93,9 @@ export default function Home() {
             title={`Switch to ${mode === "human" ? "agent" : "human"} mode`}
           >
             <div
-              className={`flex h-5 w-5 transform items-center justify-center rounded-full bg-white dark:bg-white shadow-sm transition duration-200 ease-in-out ${mode === "agent" ? "translate-x-5" : "translate-x-0"
-                }`}
+              className={`flex h-5 w-5 transform items-center justify-center rounded-full bg-white dark:bg-white shadow-sm transition duration-200 ease-in-out ${
+                mode === "agent" ? "translate-x-5" : "translate-x-0"
+              }`}
             >
               {mode === "human" ? (
                 <User className="h-3 w-3 text-black" />
@@ -662,95 +113,52 @@ export default function Home() {
           <QrCode className="h-5 w-5" />
         </button>
         <div className="h-6 w-px bg-gray-200 dark:bg-zinc-700" />
+        {portfolio.socials.map((social) => (
+          <a
+            key={social.label}
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={social.label}
+            className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
+          >
+            <Icon name={social.icon} className="h-5 w-5" />
+          </a>
+        ))}
         <a
-          href="https://github.com/PythonHacker24"
+          href={portfolio.meta.calendarUrl}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label="Calendar"
           className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
         >
-          <Github className="h-5 w-5" />
-        </a>
-        <a
-          href="https://www.linkedin.com/in/aditya-patil-260a631b2/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
-        >
-          <Linkedin className="h-5 w-5" />
-        </a>
-        <a
-          href="https://x.com/firecaffeine"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
-        >
-          <FaXTwitter className="h-5 w-5" />
-        </a>
-        <a
-          href="https://youtube.com/@theracecondition"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
-        >
-          <Youtube className="h-5 w-5" />
-        </a>
-        <a
-          href="https://discord.gg/ry4YCJaShK"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
-        >
-          <DiscordIcon className="h-5 w-5" />
-        </a>
-        <a
-          href="https://medium.com/@adityapatil24680"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
-        >
-          <FaMedium className="h-5 w-5" />
-        </a>
-        <a
-          href="https://cal.com/adi-patil/30min"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-gray-500 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors hover:scale-110"
-        >
-          <Calendar className="h-5 w-5" />
+          <Icon name="calendar" className="h-5 w-5" />
         </a>
       </nav>
 
       {/* QR Code Modal */}
-      {
-        showQR && (
+      {showQR && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 dark:bg-white/5 backdrop-blur-sm"
+          onClick={() => setShowQR(false)}
+        >
           <div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 dark:bg-white/5 backdrop-blur-sm"
-            onClick={() => setShowQR(false)}
+            className="relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-black p-8 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="relative rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-black p-8 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
+            <button
+              onClick={() => setShowQR(false)}
+              className="absolute -right-3 -top-3 rounded-full bg-black dark:bg-white p-2 text-white dark:text-black transition-transform hover:scale-110"
+              aria-label="Close"
             >
-              <button
-                onClick={() => setShowQR(false)}
-                className="absolute -right-3 -top-3 rounded-full bg-black dark:bg-white p-2 text-white dark:text-black transition-transform hover:scale-110"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              <div className="rounded-lg bg-white p-2">
-                <QRCodeSVG
-                  value="https://www.justaditya.com/"
-                  size={200}
-                  level="H"
-                  includeMargin={false}
-                />
-              </div>
+              <X className="h-4 w-4" />
+            </button>
+            <div className="rounded-lg bg-white p-2">
+              <QRCodeSVG value={portfolio.meta.siteUrl} size={200} level="H" includeMargin={false} />
             </div>
           </div>
-        )
-      }
-    </div >
+        </div>
+      )}
+    </div>
   );
 }
-

@@ -44,15 +44,15 @@ export function ExperienceItem({ title, role, children, collapsible = false, lin
             {collapsible && (
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-2 flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white"
+                    className="mt-2 flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
                 >
                     {isExpanded ? (
                         <>
-                            View Less <ChevronUp className="h-3 w-3" />
+                            View Less <ChevronUp className="h-4 w-4" />
                         </>
                     ) : (
                         <>
-                            View More <ChevronDown className="h-3 w-3" />
+                            View More <ChevronDown className="h-4 w-4" />
                         </>
                     )}
                 </button>
