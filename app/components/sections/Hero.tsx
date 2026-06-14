@@ -15,12 +15,12 @@ export function Hero({ data, time }: { data: HeroData; time: string }) {
   return (
     <>
       {/* Profile Image */}
-      <div className="relative mb-2 h-40 w-40 sm:h-56 sm:w-56 overflow-hidden">
+      <div className="relative mb-2 h-56 w-56 sm:h-80 sm:w-80 overflow-hidden">
         <Image
           src={data.image}
           alt="Profile"
           fill
-          sizes="(max-width: 640px) 160px, 224px"
+          sizes="(max-width: 640px) 224px, 320px"
           className="object-cover"
           priority
         />
