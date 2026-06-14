@@ -1,6 +1,23 @@
-import { Github, Linkedin, Youtube, Calendar, Mail, Rss } from "lucide-react";
+import { Github, Linkedin, Youtube, Calendar, Mail } from "lucide-react";
 import { FaXTwitter, FaMedium } from "react-icons/fa6";
 import type { ComponentType, SVGProps } from "react";
+
+/** Kaomoji bear face used as the blog icon — rendered as inline text. */
+const BlogIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 100 24" preserveAspectRatio="xMidYMid meet" {...props}>
+    <text
+      x="50"
+      y="20"
+      textAnchor="middle"
+      fill="currentColor"
+      fontSize="22"
+      fontWeight="600"
+      fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+    >
+      ʕ•ᴥ•ʔ
+    </text>
+  </svg>
+);
 
 export const DiscordIcon = (props: SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
@@ -18,12 +35,15 @@ export const ICONS: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   x: FaXTwitter,
   medium: FaMedium,
   discord: DiscordIcon,
-  blog: Rss,
+  blog: BlogIcon,
 };
 
 /** Resolve an icon by name, rendering nothing if the name is unknown. */
 export function Icon({ name, className }: { name: string; className?: string }) {
   const Cmp = ICONS[name];
   if (!Cmp) return null;
-  return <Cmp className={className} />;
+  // The kaomoji blog icon is wider than tall; let its width scale from the viewBox.
+  const sizing = name === "blog" ? (className?.replace(/\bw-\d+(\.\d+)?\b/g, "w-auto") ?? "h-5 w-auto") : className;
+  const extra = name === "blog" ? " scale-[1.6] origin-center" : "";
+  return <Cmp className={`${sizing ?? ""}${extra}`} />;
 }

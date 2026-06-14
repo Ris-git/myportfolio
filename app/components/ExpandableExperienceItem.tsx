@@ -19,7 +19,7 @@ export function ExpandableExperienceItem({ title, role, children, link }: Expand
             onClick={() => setOpen((v) => !v)}
         >
             <div className="flex flex-col justify-between gap-1 sm:flex-row sm:items-baseline">
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                     <span className="font-medium text-black dark:text-white">{title}</span>
                     {link && (
                         <a
@@ -33,8 +33,8 @@ export function ExpandableExperienceItem({ title, role, children, link }: Expand
                         </a>
                     )}
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 dark:text-gray-500">{role}</span>
+                <div className="flex min-w-0 items-center gap-2 sm:justify-end">
+                    <span className="text-sm text-gray-400 dark:text-gray-500 sm:text-right">{role}</span>
                     <ChevronDown
                         className={`h-3.5 w-3.5 shrink-0 text-gray-300 dark:text-gray-600 transition-transform duration-300 ${open ? "rotate-180" : ""}`}
                     />

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "siteUrl": "https://your-site.vercel.app",
+    "siteUrl": "https://myportfolio-azure-ten-25.vercel.app",
     "calendarUrl": "",
     "email": "rishabhvis15@gmail.com"
   },
@@ -8,7 +8,8 @@
     { "label": "GitHub", "href": "https://github.com/Ris-git", "icon": "github" },
     { "label": "LinkedIn", "href": "https://www.linkedin.com/in/rishabh252/", "icon": "linkedin" },
     { "label": "X", "href": "https://x.com/Vis_rishabh", "icon": "x" },
-    { "label": "Blog", "href": "https://mezz.bearblog.dev/", "icon": "blog" }
+    { "label": "Blog", "href": "https://mezz.bearblog.dev/", "icon": "blog" },
+    { "label": "Discord", "href": "https://discord.com/users/mezz3915", "icon": "discord" }
   ],
   "sections": [
     {
@@ -17,7 +18,7 @@
         "image": "/me.png",
         "name": "Rishabh Vishwakarma",
         "phonetic": "",
-        "noun": "cs student & generalist engineer",
+        "noun": "Always Exploring, Always Building",
         "timezone": { "label": "IST", "tz": "Asia/Kolkata" },
         "intro": [
           "I learn in rabbit holes. One interesting question becomes a tutorial, becomes a half-built side project, becomes three new things I'm now tracking in parallel. Most of what I actually know came from exactly this loop.",

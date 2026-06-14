@@ -21,14 +21,13 @@ export function Hero({ data, time }: { data: HeroData; time: string }) {
           alt="Profile"
           fill
           sizes="(max-width: 640px) 160px, 224px"
-          className="object-contain grayscale"
+          className="object-cover"
           priority
         />
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-black dark:via-black/60 backdrop-blur-[1px]" />
       </div>
 
-      {/* Hero Text */}
-      <h1 className="mb-4 text-5xl font-bold tracking-tight sm:text-7xl">{data.name}</h1>
+      {/* Hero Text — sized so the full name stays on one line at every viewport */}
+      <h1 className="mb-4 whitespace-nowrap text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl">{data.name}</h1>
 
       {/* Phonetic Pronunciation + local time */}
       <div className="mb-8 flex flex-wrap items-center justify-center gap-2 text-xs text-gray-400 dark:text-gray-500 sm:text-sm">

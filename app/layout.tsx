@@ -11,8 +11,8 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Aditya Patil",
-  description: "All about me",
+  title: "Rishabh Vishwakarma",
+  description: "CS student & generalist engineer — building across backend, cloud, DevOps, Android, and AI.",
 };
 
 export default function RootLayout({
